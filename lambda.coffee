@@ -1,3 +1,40 @@
+newNode = (args) ->
+	[head,tail] = args
+
+head = (args) ->
+	args[0][0]
+
+is_promise = (args) ->
+	typeof (args[0]) == "function"
+
+tail = (node) ->
+	if is_promise( [node[1]] )
+		node[1] = node[1]()
+	return node[1]
+
+uptoS = (args) ->
+	[from,to] = args
+	return if from>to
+	promise = () ->
+		uptoS([from+1,to])
+	newNode([from, promise])
+
+drop = (node) ->
+	h = head([node])
+	t = tail(node)
+	# node = t #won't work
+	if t?
+		node[0] = t[0]
+		node[1] = t[1]
+	else
+		node = undefined
+	return h
+
+showStream = (args) ->
+	[n,node] = args
+	while node and ( not n? or n-- > 0 )
+		say drop(node)
+
 empty = []	#the empty iterator
 
 say = (msg) ->
@@ -22,10 +59,7 @@ curry_n = (args) ->
 			f(sargs.concat(ssargs))
 		return curry_n( [n-sargs.length,final])
 
-upto	= curry_n([3,range])([0,1]) #creates functions upto
-upto2 = upto([2]) #creates iterators upto2
+s = uptoS([0,5])
 
-iter = upto2()
-
-while ( v = iter() ) != empty
-	console.log v
+showFirst2 = curry_n([2,showStream])([2])
+showFirst2([s])()
