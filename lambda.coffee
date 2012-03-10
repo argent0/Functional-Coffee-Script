@@ -35,6 +35,7 @@ showStream = (args) ->
 	while node and ( not n? or n-- > 0 )
 		say drop(node)
 
+
 empty = []	#the empty iterator
 
 say = (msg) ->
@@ -59,7 +60,17 @@ curry_n = (args) ->
 			f(sargs.concat(ssargs))
 		return curry_n( [n-sargs.length,final])
 
-s = uptoS([0,5])
+transform = (args) -> #applies a function to a stream
+	[f,s] = args
+	return unless s?
+	promise = () ->
+		t = tail(s)
+		transform([f,tail(s)])
+	nn = newNode([f(head([s])), promise])
 
-showFirst2 = curry_n([2,showStream])([2])
-showFirst2([s])()
+op_inc = (x) -> x*x
+
+showFirst9 = curry_n([2,showStream])([9])
+s = uptoS([0,1000])
+t = transform([op_inc,s])
+showFirst9([t])()
