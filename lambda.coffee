@@ -1,31 +1,31 @@
 empty = []	#the empty iterator
 
-range = (args...) ->
-   from = args[0][0]
-   to = args[0][1]
-   step = args[0][2]
+say = (msg) ->
+	console.log msg
 
-   value = from-step
-   return ->
-      return value=value+step if value < to
-      return empty
+range = (args) ->
+	[from,step,to] = args
 
-curry = (f) ->
-   ret = (firstArg,args...) ->
-      console.log args.join ','
-      r = (all...) ->
-         f([firstArg].concat(all))
-      return r
+	value = from-step
+	return ->
+		return value=value+step if value < to
+		return empty
 
+curry_n = (args) ->
+	#Makes a function with N arguments take default values
+	[n,f] = args
+	c = (sargs) ->
+		final = (ssargs) ->
+			f(sargs.concat(ssargs))
+		return final if sargs.length >= n
+		final = (ssargs) ->
+			f(sargs.concat(ssargs))
+		return curry_n( [n-sargs.length,final])
 
-upto = curry(range)(0)
+upto	= curry_n([3,range])([0,1]) #creates functions upto
+upto2 = upto([2]) #creates iterators upto2
 
-#upto = (x) ->
-#   y = 0
-#   return ->
-#      return y++ if y < x
-#      return empty
+iter = upto2()
 
-iter = upto(2,1)
 while ( v = iter() ) != empty
-   console.log v
+	console.log v
