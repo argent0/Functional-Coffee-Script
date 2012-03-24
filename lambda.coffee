@@ -64,11 +64,11 @@ showStream = (n,stream) -> #dumps a stream to the console
 	while stream and ( not n? or (n-- > 0 ) )
 		say drop(stream)
 
+#EXAMPLE: Calculate e(euler's constant)
 op_inc = (x) -> x+1
-u = iterate_function(op_inc)
-i = u(1)
-limit = (x) ->
+u = iterate_function(op_inc)	#stream of increasing numbers
+i = u(1)								#starting from 1
+limit = (x) ->						#How to calculate every step
 	Math.pow (1 + (1/x)), x
-identity = (x) -> x
-t = transform identity, i
-showStream(50,t)
+t = transform limit, i
+showStream(50,t)					# This is the same as doing limit(50)
