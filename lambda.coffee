@@ -50,6 +50,25 @@ iterate_function = (f) ->
 		s = newNode(x0,-> promise() )
 		return s
 
+fold = (f) ->	#works on iterators
+	return (x0) ->
+		return (iterator) ->
+			r = x0
+			while (v = iterator())?
+				r = f(r,v)
+			return r
+
+iter_stream = (stream) ->
+	return () ->
+		return drop(stream) if stream
+		return undefined
+
+limit = (n,stream) ->
+	it = iter_stream(stream)
+	return () ->
+		return it() if ( not n? or (n-- > 0 ) )
+		return undefined
+
 drop = (node) ->
 	h = head(node)
 	t = tail(node)
@@ -61,14 +80,23 @@ drop = (node) ->
 	return h
 
 showStream = (n,stream) -> #dumps a stream to the console
-	while stream and ( not n? or (n-- > 0 ) )
-		say drop(stream)
+	l = limit(n,stream)
+	while (v = l())?
+		say v
 
 #EXAMPLE: Calculate e(euler's constant)
-op_inc = (x) -> x+1
-u = iterate_function(op_inc)	#stream of increasing numbers
-i = u(1)								#starting from 1
-limit = (x) ->						#How to calculate every step
-	Math.pow (1 + (1/x)), x
-t = transform limit, i
-showStream(50,t)					# This is the same as doing limit(50)
+
+factorial = (n) ->
+	return 1 if n == 0
+	return n*factorial(n-1)
+
+op_sum = (x,y) -> x+y
+op_inc = (x) -> op_sum(x,1)
+op_identity = (x) -> x
+ups = iterate_function(op_inc)
+s = ups(0)
+op_series_term = (x) -> 1/factorial(x)
+t = transform op_series_term, s
+sum = fold(op_sum)(0)
+i = limit(30,t)
+say sum(i)
